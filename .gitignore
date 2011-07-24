@@ -1,0 +1,8 @@
+.DS_Store
+
+gen/
+bin/
+.metadata
+dist/
+build/
+
