@@ -11,6 +11,8 @@ import com.codeswimmer.android.os.DeviceIsRunning;
 public class ScreenzActivity extends Activity {
     @SuppressWarnings("unused")
     private static final String TAG = ScreenzActivity.class.getSimpleName();
+    
+    // TODO Extract these out into a DeviceInfoView class; update main.xml to <include> it
     private TextView resolutionView;
     private TextView densityView;
     private TextView deviceBuildInfoView;
@@ -26,20 +28,6 @@ public class ScreenzActivity extends Activity {
         
         if (DeviceIsRunning.Honeycomb)
             customizeActionBar();
-        
-        /*
-        System.out.println("\n***********************************************************************************");
-        System.out.println(String.format("brand: %s", Build.BRAND));
-        System.out.println(String.format("device: %s", Build.DEVICE));
-        System.out.println(String.format("display: %s", Build.DISPLAY));
-        System.out.println(String.format("fingerprint: %s", Build.FINGERPRINT));
-        System.out.println(String.format("hardware: %s", Build.HARDWARE));
-        System.out.println(String.format("manufacturer: %s", Build.MANUFACTURER));
-        System.out.println(String.format("model: %s", Build.MODEL));
-        System.out.println(String.format("product: %s", Build.PRODUCT));
-        System.out.println(String.format("tags: %s", Build.TAGS));
-        System.out.println("***********************************************************************************");
-         */
     }
     
     private void customizeActionBar() {
@@ -59,11 +47,11 @@ public class ScreenzActivity extends Activity {
         int width = dm.widthPixels;
         int height = dm.heightPixels;
         
+        String buildInfoText = String.format("%s %s", Build.MANUFACTURER, Build.MODEL);
+        deviceBuildInfoView.setText(buildInfoText);
+        
         String resolutionText = String.format("%s x %s", width, height);
         resolutionView.setText(resolutionText);
         densityView.setText(String.format("%d dpi", dm.densityDpi));
-
-        String buildInfoText = String.format("%s %s", Build.MANUFACTURER, Build.MODEL);
-        deviceBuildInfoView.setText(buildInfoText);
     }
 }

@@ -15,6 +15,7 @@ import com.codeswimmer.android.device.screen.DeviceScreen;
 import com.codeswimmer.android.device.screen.ScreenConfiguration;
 import com.codeswimmer.android.device.screen.ScreenDensity;
 import com.codeswimmer.android.device.screen.ScreenSize;
+import com.codeswimmer.common.data.Values;
 import com.codeswimmer.common.util.StringUtils;
 
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
@@ -44,6 +46,7 @@ public class CenterView extends RelativeLayout {
     private float right_inch_offset;
     private Size size;
     private int currentPositionColor = 0xc7ff7777;
+    private int versionColor = 0xffbbbbbb;
     private boolean displayTouchPoint;
     
     private MetricsView metricsView;
@@ -73,8 +76,8 @@ public class CenterView extends RelativeLayout {
         super.onAttachedToWindow();
         
         ppi = ScreenzApp.getInstance().getPixelsPerInch();
+        
         initializeDisplayers();
-
         updateDisplayValues();
         
         gridDisplay.onAttachedToWindow();
@@ -117,7 +120,12 @@ public class CenterView extends RelativeLayout {
     
     private String determineScreenDensity() {
         DisplayMetrics dm = ScreenzApp.getInstance().getDisplayMetrics();
-        ScreenDensity screenDensity = ScreenDensity.fromSize((int)dm.xdpi);
+        String dpiGroup = determineScreenDensity(dm.densityDpi);
+        return dpiGroup;
+    }
+    
+    private String determineScreenDensity(int dpi) {
+        ScreenDensity screenDensity = ScreenDensity.fromSize(dpi);
         return screenDensity.name();
     }
     
@@ -199,11 +207,13 @@ public class CenterView extends RelativeLayout {
         private Displayer majorLines;
         private Displayer minorLines;
         private CurPositionDisplayer curPosition;
+        private AppVersionDisplayer appVersion;
         
         public GridDisplay(Displayer majorLines, Displayer minorLines) {
             this.majorLines = majorLines;
             this.minorLines = minorLines;
             curPosition = new CurPositionDisplayer();
+            appVersion = new AppVersionDisplayer();
         }
         
         @Override
@@ -211,6 +221,7 @@ public class CenterView extends RelativeLayout {
             minorLines.display(canvas);
             majorLines.display(canvas);
             curPosition.display(canvas);
+            appVersion.display(canvas);
         }
         
         public void onAttachedToWindow() {
@@ -299,7 +310,7 @@ public class CenterView extends RelativeLayout {
         @Override
         public void displayHorzLines(Canvas canvas) {
             float bottom = getBottom();
-            float offset = ppi.Y() / 2;
+            float offset = ppi.Y() / 2.0f;
             float left = 0;
             float right = getWidth();
             
@@ -335,7 +346,7 @@ public class CenterView extends RelativeLayout {
         @Override
         public void displayVertLines(Canvas canvas) {
             float right = getRight();
-            float offset = ppi.X()  / 2;
+            float offset = ppi.X()  / 2.0f;
             float top = 0;
             float bottom = getBottom() - bottom_inch_offset;
             
@@ -381,6 +392,38 @@ public class CenterView extends RelativeLayout {
                 return;
             
             canvas.drawLine(0, currentTouchPoint.y, getRight() - right_inch_offset, currentTouchPoint.y, currentPositionPaint);
+        }
+    }
+    
+    private class AppVersionDisplayer implements Displayer {
+        private Paint versionPaint = new Paint();
+        private String version = Values.EMPTY_STRING;
+        
+        public AppVersionDisplayer() {
+            initializePaint();
+            initializeVersionString();
+        }
+        
+        private void initializePaint() {
+            versionPaint.setColor(versionColor);
+            versionPaint.setTextSize(20.0f);
+            versionPaint.setTypeface(Typeface.DEFAULT_BOLD);
+            versionPaint.setAntiAlias(true);
+        }
+        
+        private void initializeVersionString() {
+            String versionNumber = getContext().getString(R.string.app_version);
+            version = String.format("Version %s", versionNumber);
+        }
+        
+        @Override
+        public void display(Canvas canvas) {
+            if (StringUtils.isEmpty(version))
+                return;
+            
+            float x = 5.0f;
+            float y = ppi.Y() - 5.0f;
+            canvas.drawText(version, x, y, versionPaint);
         }
     }
 }
